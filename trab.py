@@ -1,6 +1,9 @@
+pip install wikipedia
+
 import streamlit as st
 import pandas as pd
 import wikipedia
+
 
 st.set_page_config(page_title="Afinidade Legislativa", layout="centered")
 
