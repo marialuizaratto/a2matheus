@@ -1,10 +1,14 @@
 import streamlit as st
 import pandas as pd
+import wikipedia
 
-st.set_page_config(page_title="Recomende seu Deputado", layout="centered")
+st.set_page_config(page_title="Afinidade Legislativa", layout="centered")
 
-st.title("🔎 Qual deputado combina com você?")
-st.write("Responda às perguntas sobre projetos de lei recentes. No final, mostraremos quais deputados do seu estado mais se alinham com suas opiniões.")
+st.title("📊 Afinidade Legislativa com Deputados Federais")
+st.write("""
+Este aplicativo compara suas opiniões com votações reais da Câmara dos Deputados. 
+A partir das suas respostas, identificamos quais deputados do seu estado votam de forma mais alinhada com você.
+""")
 
 @st.cache_data
 def carregar_dados():
@@ -13,7 +17,7 @@ def carregar_dados():
 
 df = carregar_dados()
 
-# ✅ Perguntas associadas a cada votação (id_votacao: texto)
+# Perguntas associadas a cada id de votação
 perguntas = {
     "345311-270": "Você concorda com o Marco Temporal para demarcação de terras indígenas?",
     "2438467-47": "Você apoia a criação do Dia Nacional para a Ação Climática?",
@@ -27,11 +31,9 @@ perguntas = {
     "2310025-56": "Você apoia a Lei Aldir Blanc de incentivo à cultura?"
 }
 
-# Interface: Estado
 ufs_disponiveis = sorted(df["uf"].dropna().unique())
 uf_usuario = st.selectbox("Escolha seu estado (UF):", ufs_disponiveis)
 
-# Interface: Perguntas
 respostas_usuario = {}
 opcoes_resposta = ["Discordo muito", "Discordo", "Neutro", "Concordo", "Concordo muito"]
 
@@ -41,7 +43,6 @@ for id_vot, pergunta in perguntas.items():
     resposta = st.radio(pergunta, opcoes_resposta, key=id_vot)
     respostas_usuario[id_vot] = resposta
 
-# Mapeamento de pontuação
 pesos_usuario = {
     "Discordo muito": -2,
     "Discordo": -1,
@@ -50,9 +51,16 @@ pesos_usuario = {
     "Concordo muito": 2
 }
 
-# Cálculo
-if st.button("Ver meus deputados mais compatíveis"):
-    st.subheader("🎯 Deputados mais compatíveis com você")
+def buscar_wikipedia(nome):
+    wikipedia.set_lang("pt")
+    try:
+        resumo = wikipedia.summary(nome, sentences=3)
+        return resumo
+    except Exception:
+        return "Não foi possível encontrar uma descrição na Wikipedia."
+
+if st.button("Ver afinidade com deputados do seu estado"):
+    st.subheader("🏆 Pódio de afinidade legislativa")
 
     pontuacoes = {}
 
@@ -76,11 +84,27 @@ if st.button("Ver meus deputados mais compatíveis"):
             chave = f"{nome} ({partido})"
             pontuacoes[chave] = pontuacoes.get(chave, 0) + compat
 
-    # Ranking final
     ranking = sorted(pontuacoes.items(), key=lambda x: x[1], reverse=True)
 
     if ranking:
-        for i, (deputado, score) in enumerate(ranking[:5], 1):
-            st.write(f"{i}. {deputado} — {score} pontos")
+        for i, (dep, score) in enumerate(ranking[:3], 1):
+            st.write(f"{i}º lugar: {dep} — {score} pontos")
+
+        # 1º lugar: mostrar descrição e como votou
+        dep_vencedor = ranking[0][0]
+        nome_vencedor = dep_vencedor.split(" (")[0]
+
+        st.subheader(f"🧾 Quem é {nome_vencedor}?")
+        descricao = buscar_wikipedia(nome_vencedor)
+        st.write(descricao)
+
+        st.subheader(f"📌 Como {nome_vencedor} votou nas questões:")
+        votos_vencedor = df[(df["nome"] == nome_vencedor) & (df["uf"] == uf_usuario)]
+
+        for id_vot, pergunta in perguntas.items():
+            voto = votos_vencedor[votos_vencedor["id_votacao"] == id_vot]["voto"].values
+            voto_final = voto[0] if len(voto) > 0 else "Sem registro"
+            st.markdown(f"- **{pergunta}** → {voto_final}")
     else:
-        st.info("Nenhum deputado encontrado para esse estado e essas votações.")
+        st.info("Nenhum deputado encontrado para esse estado.")
+
