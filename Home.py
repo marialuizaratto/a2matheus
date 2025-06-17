@@ -22,7 +22,7 @@ df = carregar_dados()
 perguntas = {
     "345311-270": "Você concorda com o [Marco Temporal](https://www.camara.leg.br/noticias/966618-o-que-e-marco-temporal-e-quais-os-argumentos-favoraveis-e-contrarios/#:~:text=Marco%20temporal%20%C3%A9%20uma%20tese,data%20de%20promulga%C3%A7%C3%A3o%20da%20Constitui%C3%A7%C3%A3o.) para demarcação de terras indígenas?",
     "2438467-47": "Você apoia a criação do Dia Nacional para a Ação Climática?",
-    "2207613-167": "Você é contra a privatização de empresas e o aumento de custos no saneamento básico?",
+    "2207613-167": "Você é contra a privatização de empresas de saneamento básico?",
     "264726-144": "Você apoia o aumento de pena para porte ilegal de arma?",
     "604557-205": "Você apoia a [Lei do Mar](https://www.camara.leg.br/noticias/1163592-camara-aprova-projeto-que-cria-a-lei-do-mar), que regula a exploração sustentável dos recursos marítimos?",
     "2417025-55": "Você concorda que uma pessoa que ganha 2 salários mínimos deve pagar imposto de renda?",
