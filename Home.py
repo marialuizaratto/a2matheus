@@ -4,12 +4,11 @@ import wikipedia
 import requests
 from bs4 import BeautifulSoup
 
-# Configuração da página — deve ser o primeiro comando streamlit chamado!
+# Configuração da página
 st.set_page_config(page_title="Afinidade Legislativa", layout="centered", initial_sidebar_state="expanded")
 
 st.title("📊 Afinidade Legislativa com Deputados Federais")
 
-# Label maior para seleção do estado
 st.markdown("<h3 style='font-size:24px;'>📍 Escolha seu estado:</h3>", unsafe_allow_html=True)
 
 @st.cache_data
@@ -19,18 +18,17 @@ def carregar_dados():
 df = carregar_dados()
 
 perguntas = {
-    "345311-270": 'Você concorda com o <a href="https://www.camara.leg.br/noticias/966618-o-que-e-marco-temporal-e-quais-os-argumentos-favoraveis-e-contrarios/#:~:text=Marco%20temporal%20%C3%A9%20uma%20tese,data%20de%20promulga%C3%A7%C3%A3o%20da%20Constitui%C3%A7%C3%A3o." target="_blank" style="color:blue; text-decoration:underline;">Marco Temporal</a> para demarcação de terras indígenas?',
+    "345311-270": "Você concorda com o [Marco Temporal](https://www.camara.leg.br/noticias/966618-o-que-e-marco-temporal-e-quais-os-argumentos-favoraveis-e-contrarios/#:~:text=Marco%20temporal%20%C3%A9%20uma%20tese,data%20de%20promulga%C3%A7%C3%A3o%20da%20Constitui%C3%A7%C3%A3o.) para demarcação de terras indígenas?",
     "2438467-47": "Você apoia a criação do Dia Nacional para a Ação Climática?",
     "2207613-167": "Você é contra a privatização de empresas e o aumento de custos no saneamento básico?",
     "264726-144": "Você apoia o aumento de pena para porte ilegal de arma?",
-    "604557-205": 'Você apoia a <a href="https://www.camara.leg.br/noticias/1163592-camara-aprova-projeto-que-cria-a-lei-do-mar" target="_blank" style="color:blue; text-decoration:underline;">Lei do Mar</a>, que regula a exploração sustentável dos recursos marítimos?',
+    "604557-205": "Você apoia a [Lei do Mar](https://www.camara.leg.br/noticias/1163592-camara-aprova-projeto-que-cria-a-lei-do-mar), que regula a exploração sustentável dos recursos marítimos?",
     "2417025-55": "Você concorda que uma pessoa que ganha 2 salários mínimos deve pagar imposto de renda?",
     "2231632-97": "Você concorda que documentos públicos devem usar linguagem acessível?",
     "2345281-63": "Você concorda que mulheres têm direito à cirurgia reparadora das mamas após câncer pelo SUS?",
     "2078693-87": "Você apoia repasses federais mesmo para municípios inadimplentes, se for para combater a violência contra a mulher?",
-    "2310025-56": 'Você apoia a <a href="https://www.gov.br/pt-br/noticias/cultura-artes-historia-e-esportes/2020/08/lei-aldir-blanc-de-apoio-a-cultura-e-regulamentada-pelo-governo-federal" target="_blank" style="color:blue; text-decoration:underline;">Lei Aldir Blanc</a> de incentivo à cultura?'
+    "2310025-56": "Você apoia a [Lei Aldir Blanc](https://www.gov.br/pt-br/noticias/cultura-artes-historia-e-esportes/2020/08/lei-aldir-blanc-de-apoio-a-cultura-e-regulamentada-pelo-governo-federal) de incentivo à cultura?"
 }
-
 
 pesos_usuario = {
     "Discordo muito": -2,
@@ -47,41 +45,50 @@ respostas_usuario = {}
 
 st.subheader("🗳️ Suas opiniões sobre os temas abaixo:")
 
-# CSS para estilizar perguntas e respostas, e tirar espaçamento entre eles
-st.markdown(
-    """
-    <style>
-    .pergunta {
-        font-size: 18px;
-        margin-bottom: 0px;
-        font-weight: normal; /* sem negrito */
-    }
-    div[data-testid="stRadio"] > label {
-        font-size: 16px !important;
-        margin: 0px !important;
-        padding: 0 8px 4px 8px !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # Barra de progresso para respostas
 progress_resp = st.progress(0)
 
 total_perguntas = len(perguntas)
+
+# CSS global para perguntas e radios
+st.markdown(
+    """
+    <style>
+    /* Perguntas maiores e sem margin-bottom */
+    .pergunta {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 0px;
+    }
+    /* Radios com fonte maior e sem margem */
+    div[role="radiogroup"] > label > div[data-testid="stMarkdownContainer"] > p {
+        font-size: 16px;
+        margin: 0px;
+        padding: 0px;
+    }
+    /* Espaçamento entre bloco de pergunta+resposta e próximo */
+    .bloco {
+        margin-bottom: 1.2rem;
+    }
+    /* Remove espaçamento extra entre pergunta e opções */
+    .stRadio > div {
+        margin-top: 0px;
+    }
+    </style>
+    """, unsafe_allow_html=True
+)
+
 for i, (id_vot, pergunta) in enumerate(perguntas.items(), 1):
-    st.markdown(f'<div class="pergunta">{pergunta}</div>', unsafe_allow_html=True)
-
-    resposta = st.radio(
-        "",
-        list(pesos_usuario.keys()),
-        key=id_vot,
-        label_visibility="collapsed"
-    )
-
-    respostas_usuario[id_vot] = resposta
-    progress_resp.progress(i / total_perguntas)
+    with st.container():
+        st.markdown(f"<p class='pergunta'>{pergunta}</p>", unsafe_allow_html=True)
+        resposta = st.radio(
+            "",
+            list(pesos_usuario.keys()),
+            key=id_vot,
+            label_visibility="collapsed"
+        )
+        respostas_usuario[id_vot] = resposta
+        progress_resp.progress(i / total_perguntas)
 
 progress_resp.empty()
 
@@ -191,9 +198,10 @@ if st.button("🔍 Ver afinidade com deputados"):
                 cor = "red"
 
             st.markdown(
-                f'<span style="color:{cor}">• {pergunta} → {voto_final}</span>',
+                f'<span style="color:{cor}">• <b>{pergunta}</b> → {voto_final}</span>',
                 unsafe_allow_html=True
             )
     else:
         st.info("Nenhum deputado encontrado para esse estado.")
+
 
