@@ -33,7 +33,7 @@ def carregar_dados():
 df = carregar_dados()
 
 perguntas = {
-    "345311-270": "Você concorda com o Marco Temporal para demarcação de terras indígenas?",
+    "345311-270": "Você concorda com o [Marco Temporal](https://www.camara.leg.br/noticias/966618-o-que-e-marco-temporal-e-quais-os-argumentos-favoraveis-e-contrarios/#:~:text=Marco%20temporal%20%C3%A9%20uma%20tese,data%20de%20promulga%C3%A7%C3%A3o%20da%20Constitui%C3%A7%C3%A3o.) para demarcação de terras indígenas?",
     "2438467-47": "Você apoia a criação do Dia Nacional para a Ação Climática?",
     "2207613-167": "Você é a favor da privatização do saneamento básico, mesmo que isso possa aumentar os custos para a população?",
     "264726-144": "Você apoia o aumento de pena para porte ilegal de arma?",
@@ -42,9 +42,10 @@ perguntas = {
     "2231632-97": "Você concorda que documentos públicos devem usar linguagem acessível?",
     "2345281-63": "Você concorda que mulheres têm direito à cirurgia reparadora das mamas após câncer pelo SUS?",
     "2078693-87": "Você apoia repasses federais mesmo para municípios inadimplentes, se for para combater a violência contra a mulher?",
-    "2310025-56": "Você apoia a [Lei Aldir Blanc](https://www.gov.br/pt-br/noticias/cultura-artes-historia-e-esportes/2020/08/lei-aldir-blanc-de-apoio-a-cultura-e-regulamentada-pelo-governo-federal) de incentivo à cultura?"
+    "2310025-56": "Você apoia a [Lei Aldir Blanc](https://www.gov.br/pt-br/noticias/cultura-artes-historia-e-esportes/2020/08/lei-aldir-blanc-de-apoio-a-cultura-e-regulamentada-pelo-governo-federal) de incentivo à cultura?",
+    "2266116-87-1": "Você concorda que presos por homicídio qualificado devem cumprir pena em estabelecimentos penais federais de segurança máxima?",
+    "2266116-87-2": "Você concorda que presos por homicídio qualificado devem cumprir Regime Disciplinar Diferenciado em unidades federais?"
 }
-
 
 # Pontuação do usuário
 pesos_usuario = {
