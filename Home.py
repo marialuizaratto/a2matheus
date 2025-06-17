@@ -3,12 +3,14 @@ import pandas as pd
 import wikipedia
 import requests
 from bs4 import BeautifulSoup
+import re
 
 # Configuração da página
 st.set_page_config(page_title="Afinidade Legislativa", layout="centered", initial_sidebar_state="expanded")
 
 st.title("📊 Afinidade Legislativa com Deputados Federais")
 
+# Label maior para seleção do estado
 st.markdown("<h3 style='font-size:24px;'>📍 Escolha seu estado:</h3>", unsafe_allow_html=True)
 
 @st.cache_data
@@ -45,50 +47,50 @@ respostas_usuario = {}
 
 st.subheader("🗳️ Suas opiniões sobre os temas abaixo:")
 
+# Função para converter links Markdown para HTML
+def md_to_html_link(text):
+    pattern = r"\[([^\]]+)\]\(([^)]+)\)"
+    return re.sub(pattern, r'<a href="\2" target="_blank" style="color:#1a73e8;">\1</a>', text)
+
 # Barra de progresso para respostas
 progress_resp = st.progress(0)
-
 total_perguntas = len(perguntas)
 
-# CSS global para perguntas e radios
-st.markdown(
-    """
-    <style>
-    /* Perguntas maiores e sem margin-bottom */
-    .pergunta {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 0px;
-    }
-    /* Radios com fonte maior e sem margem */
-    div[role="radiogroup"] > label > div[data-testid="stMarkdownContainer"] > p {
-        font-size: 16px;
-        margin: 0px;
-        padding: 0px;
-    }
-    /* Espaçamento entre bloco de pergunta+resposta e próximo */
-    .bloco {
-        margin-bottom: 1.2rem;
-    }
-    /* Remove espaçamento extra entre pergunta e opções */
-    .stRadio > div {
-        margin-top: 0px;
-    }
-    </style>
-    """, unsafe_allow_html=True
-)
-
 for i, (id_vot, pergunta) in enumerate(perguntas.items(), 1):
-    with st.container():
-        st.markdown(f"<p class='pergunta'>{pergunta}</p>", unsafe_allow_html=True)
-        resposta = st.radio(
-            "",
-            list(pesos_usuario.keys()),
-            key=id_vot,
-            label_visibility="collapsed"
-        )
-        respostas_usuario[id_vot] = resposta
-        progress_resp.progress(i / total_perguntas)
+    pergunta_html = md_to_html_link(pergunta)
+
+    # Pergunta com fonte maior e margem inferior para espaçamento
+    st.markdown(
+        f'<div style="margin-bottom:0.3rem; font-size:18px; font-weight:600;">{pergunta_html}</div>',
+        unsafe_allow_html=True
+    )
+    
+    resposta = st.radio(
+        "",
+        list(pesos_usuario.keys()),
+        key=id_vot,
+        label_visibility="collapsed"
+    )
+
+    # CSS para aumentar fonte das opções do radio e remover margens
+    st.markdown(
+        """
+        <style>
+        div[role="radiogroup"] > label > div[data-testid="stMarkdownContainer"] > p {
+            font-size: 16px;
+            margin: 0px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    respostas_usuario[id_vot] = resposta
+
+    # Espaço maior entre perguntas
+    st.markdown('<div style="margin-bottom: 1.5rem;"></div>', unsafe_allow_html=True)
+
+    progress_resp.progress(i / total_perguntas)
 
 progress_resp.empty()
 
@@ -203,5 +205,6 @@ if st.button("🔍 Ver afinidade com deputados"):
             )
     else:
         st.info("Nenhum deputado encontrado para esse estado.")
+
 
 
