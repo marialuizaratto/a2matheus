@@ -29,9 +29,7 @@ perguntas = {
     "2231632-97": "Você concorda que documentos públicos devem usar linguagem acessível?",
     "2345281-63": "Você concorda que mulheres têm direito à cirurgia reparadora das mamas após câncer pelo SUS?",
     "2078693-87": "Você apoia repasses federais mesmo para municípios inadimplentes, se for para combater a violência contra a mulher?",
-    "2310025-56": "Você apoia a Lei Aldir Blanc de incentivo à cultura?",
- 
-    
+    "2310025-56": "Você apoia a Lei Aldir Blanc de incentivo à cultura?"
 }
 
 
