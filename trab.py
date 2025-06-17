@@ -35,7 +35,7 @@ perguntas = {
 
 ufs_disponiveis = sorted(df["uf"].dropna().unique())
 @@ -55,12 +47,24 @@ def carregar_dados():
-}
+
 
 def buscar_wikipedia(nome):
     wikipedia.set_lang("pt")
