@@ -1,127 +1,88 @@
+pip install wikipedia
+
 import streamlit as st
 import pandas as pd
+import wikipedia
+
 import requests
+from bs4 import BeautifulSoup
 
 st.set_page_config(page_title="Afinidade Legislativa", layout="centered")
 
 st.title("📊 Afinidade Legislativa com Deputados Federais")
+st.write("""
+Este aplicativo compara suas opiniões com votações reais da Câmara dos Deputados. 
+Este aplicativo compara suas opiniões com votações reais da Câmara dos Deputados.
 
-@st.cache_data
-def carregar_dados():
-    df = pd.read_csv("votos_camara.csv")
-    return df
+A partir das suas respostas, identificamos quais deputados do seu estado votam de forma mais alinhada com você.
+""")
 
-df = carregar_dados()
+@@ -22,16 +21,9 @@ def carregar_dados():
 
+# Perguntas associadas a cada id de votação
 perguntas = {
-    # ... seu dicionário de perguntas ...
+    "345311-270": "Você concorda com o Marco Temporal para demarcação de terras indígenas?",
+    "2438467-47": "Você apoia a criação do Dia Nacional para a Ação Climática?",
+    "2207613-167": "Você é contra a privatização de empresas e o aumento de custos no saneamento básico?",
+    "264726-144": "Você apoia o aumento de pena para porte ilegal de arma?",
+    "604557-205": "Você apoia a Lei do Mar, que regula a exploração sustentável dos recursos marítimos?",
+    "2417025-55": "Você concorda que uma pessoa que ganha 2 salários mínimos deve pagar imposto de renda?",
+    "2231632-97": "Você concorda que documentos públicos devem usar linguagem acessível?",
+    "2345281-63": "Você concorda que mulheres têm direito à cirurgia reparadora das mamas após câncer pelo SUS?",
+    "2078693-87": "Você apoia repasses federais mesmo para municípios inadimplentes, se for para combater a violência contra a mulher?",
+    "2310025-56": "Você apoia a Lei Aldir Blanc de incentivo à cultura?"
+    "2453934-65": "Você concorda com o PL das fake news?",
+    "2236291-85": "Você apoia o novo arcabouço fiscal (substituição do teto de gastos)?"
+    # Adicione mais PLs conforme o seu CSV
 }
 
 ufs_disponiveis = sorted(df["uf"].dropna().unique())
-uf_usuario = st.selectbox("Escolha seu estado (UF):", ufs_disponiveis)
-
-respostas_usuario = {}
-opcoes_resposta = ["Discordo muito", "Discordo", "Neutro", "Concordo", "Concordo muito"]
-
-st.subheader("📋 Suas respostas")
-
-for id_vot, pergunta in perguntas.items():
-    resposta = st.radio(pergunta, opcoes_resposta, key=id_vot)
-    respostas_usuario[id_vot] = resposta
-
-pesos_usuario = {
-    "Discordo muito": -2,
-    "Discordo": -1,
-    "Neutro": 0,
-    "Concordo": 1,
-    "Concordo muito": 2
+@@ -55,12 +47,24 @@ def carregar_dados():
 }
 
-@st.cache_data(show_spinner=False)
-def buscar_info_deputado(id_dep):
-    url = f"https://dadosabertos.camara.leg.br/api/v2/deputados/{id_dep}"
-    resp = requests.get(url)
-    if resp.status_code == 200:
-        dados = resp.json()["dados"]
-        return {
-            "nome": dados["nome"],
-            "partido": dados["ultimoStatus"]["siglaPartido"],
-            "uf": dados["ultimoStatus"]["siglaUf"],
-            "foto": dados["ultimoStatus"]["urlFoto"]
-        }
-    return None
+def buscar_wikipedia(nome):
+    wikipedia.set_lang("pt")
+    url = f"https://pt.wikipedia.org/wiki/{nome.replace(' ', '_')}"
+    headers = {"User-Agent": "Mozilla/5.0"}
+
+    try:
+        resumo = wikipedia.summary(nome, sentences=3)
+        return resumo
+    except Exception:
+        return "Não foi possível encontrar uma descrição na Wikipedia."
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            return "Não foi possível encontrar uma descrição na Wikipedia."
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+        paragrafo = soup.select_one("p")
+
+        if paragrafo and paragrafo.text.strip():
+            return paragrafo.text.strip()
+        else:
+            return "Página encontrada, mas sem resumo disponível."
+
+    except Exception as e:
+        return f"Erro ao acessar Wikipedia: {e}"
 
 if st.button("Ver afinidade com deputados do seu estado"):
-    pontuacoes = {}
+    st.subheader("🏆 Pódio de afinidade legislativa")
+@@ -93,7 +97,6 @@ def buscar_wikipedia(nome):
+        for i, (dep, score) in enumerate(ranking[:3], 1):
+            st.write(f"{i}º lugar: {dep} — {score} pontos")
 
-    for id_vot, resp_user in respostas_usuario.items():
-        peso_user = pesos_usuario.get(resp_user, 0)
-        votos = df[(df["id_votacao"] == id_vot) & (df["uf"] == uf_usuario)]
+        # 1º lugar: mostrar descrição e como votou
+        dep_vencedor = ranking[0][0]
+        nome_vencedor = dep_vencedor.split(" (")[0]
 
-        for _, linha in votos.iterrows():
-            id_dep = linha["id_dep"]
-            voto_dep = linha["voto"]
+@@ -105,8 +108,8 @@ def buscar_wikipedia(nome):
+        votos_vencedor = df[(df["nome"] == nome_vencedor) & (df["uf"] == uf_usuario)]
 
-            if voto_dep == "Sim":
-                peso_dep = 1
-            elif voto_dep == "Não":
-                peso_dep = -1
-            else:
-                peso_dep = 0
-
-            compat = peso_user * peso_dep
-
-            if id_dep is not None:
-                pontuacoes[id_dep] = pontuacoes.get(id_dep, 0) + compat
-
-    if not pontuacoes:
-        st.info("Nenhum deputado encontrado para esse estado.")
+        for id_vot, pergunta in perguntas.items():
+            voto = votos_vencedor[votos_vencedor["id_votacao"] == id_vot]["voto"].values
+            voto_final = voto[0] if len(voto) > 0 else "Sem registro"
+            voto_linha = votos_vencedor[votos_vencedor["id_votacao"] == id_vot]
+            voto_final = voto_linha["voto"].iloc[0] if not voto_linha.empty else "Sem registro"
+            st.markdown(f"- **{pergunta}** → {voto_final}")
     else:
-        ranking = sorted(pontuacoes.items(), key=lambda x: x[1], reverse=True)
-        st.write("### Top 3 deputados mais alinhados:")
-        for i, (id_dep, score) in enumerate(ranking[:3], 1):
-            info = buscar_info_deputado(id_dep)
-            if info:
-                st.write(f"{i}º lugar: {info['nome']} ({info['partido']}-{info['uf']}) — {score} pontos")
-                st.image(info["foto"], width=120)
-            else:
-                st.write(f"{i}º lugar: Deputado ID {id_dep} — {score} pontos (Info não disponível)")
-
-        # Detalhes do campeão
-        id_vencedor = ranking[0][0]
-        info_vencedor = buscar_info_deputado(id_vencedor)
-        if info_vencedor:
-            st.subheader(f"🧾 Quem é {info_vencedor['nome']}?")
-            st.image(info_vencedor["foto"], width=200)
-            st.write(f"Partido: {info_vencedor['partido']} - {info_vencedor['uf']}")
-
-            st.subheader(f"📌 Como {info_vencedor['nome']} votou nas questões:")
-
-            votos_vencedor = df[(df["id_dep"] == id_vencedor) & (df["uf"] == uf_usuario)]
-
-            for id_vot, pergunta in perguntas.items():
-                voto_linha = votos_vencedor[votos_vencedor["id_votacao"] == id_vot]
-                voto_final = voto_linha["voto"].iloc[0] if not voto_linha.empty else "Sem registro"
-
-                peso_user = pesos_usuario[respostas_usuario[id_vot]]
-                if voto_final == "Sim":
-                    peso_dep = 1
-                elif voto_final == "Não":
-                    peso_dep = -1
-                else:
-                    peso_dep = 0
-
-                if peso_user == 0 or peso_dep == 0:
-                    cor = "gray"
-                elif peso_user == peso_dep or peso_user * peso_dep > 0:
-                    cor = "green"
-                else:
-                    cor = "red"
-
-                st.markdown(
-                    f'<span style="color:{cor}">• <b>{pergunta}</b> → {voto_final}</span>',
-                    unsafe_allow_html=True
-                )
-        else:
-            st.info("Não foi possível recuperar informações do deputado vencedor.")
-
+        st.info("Nenhum deputado encontrado para esse estado.")
