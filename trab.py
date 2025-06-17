@@ -32,21 +32,19 @@ def carregar_dados():
 
 df = carregar_dados()
 
-# Perguntas vinculadas às votações
 perguntas = {
     "345311-270": "Você concorda com o Marco Temporal para demarcação de terras indígenas?",
     "2438467-47": "Você apoia a criação do Dia Nacional para a Ação Climática?",
-    "2207613-167": "Você é contra a privatização de empresas e o aumento de custos no saneamento básico?",
+    "2207613-167": "Você é a favor da privatização do saneamento básico, mesmo que isso possa aumentar os custos para a população?",
     "264726-144": "Você apoia o aumento de pena para porte ilegal de arma?",
-    "604557-205": "Você apoia a Lei do Mar, que regula a exploração sustentável dos recursos marítimos?",
+    "604557-205": "Você apoia a [Lei do Mar](https://www.camara.leg.br/noticias/1163592-camara-aprova-projeto-que-cria-a-lei-do-mar), que regula a exploração sustentável dos recursos marítimos?",
     "2417025-55": "Você concorda que uma pessoa que ganha 2 salários mínimos deve pagar imposto de renda?",
     "2231632-97": "Você concorda que documentos públicos devem usar linguagem acessível?",
     "2345281-63": "Você concorda que mulheres têm direito à cirurgia reparadora das mamas após câncer pelo SUS?",
     "2078693-87": "Você apoia repasses federais mesmo para municípios inadimplentes, se for para combater a violência contra a mulher?",
-    "2310025-56": "Você apoia a Lei Aldir Blanc de incentivo à cultura?",
-    "2453934-65": "Você concorda com o PL das fake news?",
-    "2236291-85": "Você apoia o novo arcabouço fiscal (substituição do teto de gastos)?"
+    "2310025-56": "Você apoia a [Lei Aldir Blanc](https://www.gov.br/pt-br/noticias/cultura-artes-historia-e-esportes/2020/08/lei-aldir-blanc-de-apoio-a-cultura-e-regulamentada-pelo-governo-federal) de incentivo à cultura?"
 }
+
 
 # Pontuação do usuário
 pesos_usuario = {
