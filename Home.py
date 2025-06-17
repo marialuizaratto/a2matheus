@@ -29,7 +29,9 @@ perguntas = {
     "2231632-97": "Você concorda que documentos públicos devem usar linguagem acessível?",
     "2345281-63": "Você concorda que mulheres têm direito à cirurgia reparadora das mamas após câncer pelo SUS?",
     "2078693-87": "Você apoia repasses federais mesmo para municípios inadimplentes, se for para combater a violência contra a mulher?",
-    "2310025-56": "Você apoia a [Lei Aldir Blanc](https://www.gov.br/pt-br/noticias/cultura-artes-historia-e-esportes/2020/08/lei-aldir-blanc-de-apoio-a-cultura-e-regulamentada-pelo-governo-federal) de incentivo à cultura?"
+    "2310025-56": "Você apoia a [Lei Aldir Blanc](https://www.gov.br/pt-br/noticias/cultura-artes-historia-e-esportes/2020/08/lei-aldir-blanc-de-apoio-a-cultura-e-regulamentada-pelo-governo-federal) de incentivo à cultura?",
+    "2266116-87-1": "Você concorda que presos por homicídio qualificado devem cumprir pena em estabelecimentos penais federais de segurança máxima?",
+    "2266116-87-2": "Você concorda que presos por homicídio qualificado devem cumprir Regime Disciplinar Diferenciado em unidades federais?"
 }
 
 pesos_usuario = {
@@ -59,7 +61,6 @@ total_perguntas = len(perguntas)
 for i, (id_vot, pergunta) in enumerate(perguntas.items(), 1):
     pergunta_html = md_to_html_link(pergunta)
 
-    # Pergunta com fonte maior e margem inferior para espaçamento
     st.markdown(
         f'<div style="margin-bottom:0.3rem; font-size:18px; font-weight:600;">{pergunta_html}</div>',
         unsafe_allow_html=True
@@ -72,7 +73,6 @@ for i, (id_vot, pergunta) in enumerate(perguntas.items(), 1):
         label_visibility="collapsed"
     )
 
-    # CSS para aumentar fonte das opções do radio e remover margens
     st.markdown(
         """
         <style>
@@ -86,10 +86,7 @@ for i, (id_vot, pergunta) in enumerate(perguntas.items(), 1):
     )
 
     respostas_usuario[id_vot] = resposta
-
-    # Espaço maior entre perguntas
     st.markdown('<div style="margin-bottom: 1.5rem;"></div>', unsafe_allow_html=True)
-
     progress_resp.progress(i / total_perguntas)
 
 progress_resp.empty()
@@ -110,17 +107,21 @@ def buscar_wikipedia_info(nome):
 if st.button("🔍 Ver afinidade com deputados"):
     st.subheader("🏆 Pódio de afinidade legislativa")
 
-    deputados_uf = df[df["uf"] == uf_usuario]["nome"].unique()
+    deputados_uf = df[df["uf"] == uf_usuario][["nome", "partido"]].drop_duplicates()
     ranking = []
 
     progress = st.progress(0)
     total = len(deputados_uf)
-    for i, deputado in enumerate(deputados_uf):
+
+    for i, row in deputados_uf.reset_index(drop=True).iterrows():
+        deputado = row["nome"]
+        partido = row["partido"]
+
         votos_dep = df[(df["nome"] == deputado) & (df["id_votacao"].isin(perguntas.keys()))]
         score = 0
-        for _, row in votos_dep.iterrows():
-            id_vot = row["id_votacao"]
-            voto_dep = row["voto"]
+        for _, voto_row in votos_dep.iterrows():
+            id_vot = voto_row["id_votacao"]
+            voto_dep = voto_row["voto"]
             voto_usuario = respostas_usuario.get(id_vot)
 
             peso_usuario = pesos_usuario[voto_usuario]
@@ -133,31 +134,26 @@ if st.button("🔍 Ver afinidade com deputados"):
 
             score += peso_usuario * peso_dep
 
-        ranking.append((deputado, score))
+        ranking.append((deputado, partido, score))
         progress.progress((i + 1) / total)
 
     progress.empty()
 
-    ranking.sort(key=lambda x: x[1], reverse=True)
+    ranking.sort(key=lambda x: x[2], reverse=True)
 
     medalhas = ["🥇", "🥈", "🥉"]
 
     if ranking:
-        # Mostrar top 3 com medalhas
-        for i, (dep, score) in enumerate(ranking[:3], 1):
-            st.write(f"{medalhas[i-1]} {i}º lugar: **{dep}** — {score} pontos")
+        for i, (dep, part, score) in enumerate(ranking[:3], 1):
+            st.write(f"{medalhas[i-1]} {i}º lugar: **{dep} ({part})** — {score} pontos")
 
-        # Mostrar deputado com maior afinidade (campeão)
-        dep_vencedor = ranking[0][0]
-        score_vencedor = ranking[0][1]
+        dep_vencedor, part_vencedor, score_vencedor = ranking[0]
         nome_vencedor = dep_vencedor.split(" (")[0]
 
-        # Mostrar deputado com menor afinidade logo abaixo em fonte menor e vermelha
-        menos_afinidade = min(ranking, key=lambda x: x[1])
-        dep_menor = menos_afinidade[0]
-        score_menor = menos_afinidade[1]
+        menos_afinidade = min(ranking, key=lambda x: x[2])
+        dep_menor, part_menor, score_menor = menos_afinidade
 
-        st.markdown(f"<h3 style='margin-top: 1rem;'>🧾 Quem é {nome_vencedor}?</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='margin-top: 1rem;'>🧾 Quem é {dep_vencedor}?</h3>", unsafe_allow_html=True)
         resumo, imagem_url = buscar_wikipedia_info(nome_vencedor)
         if imagem_url:
             st.markdown(
@@ -170,15 +166,14 @@ if st.button("🔍 Ver afinidade com deputados"):
             )
         st.write(resumo)
 
-        # Deputado com menor afinidade em vermelho e fonte menor, logo após o campeão
         st.markdown(
-            f"<p style='color:red; font-size:14px; margin-top:0.5rem;'>😕 Deputado com menor afinidade: <b>{dep_menor}</b> — {score_menor} pontos</p>",
+            f"<p style='color:red; font-size:14px; margin-top:0.5rem;'>😕 Deputado com menor afinidade: <b>{dep_menor} ({part_menor})</b> — {score_menor} pontos</p>",
             unsafe_allow_html=True
         )
 
-        st.subheader(f"📌 Como {nome_vencedor} votou nas questões:")
+        st.subheader(f"📌 Como {dep_vencedor} votou nas questões:")
 
-        votos_vencedor = df[(df["nome"] == nome_vencedor) & (df["uf"] == uf_usuario)]
+        votos_vencedor = df[(df["nome"] == dep_vencedor) & (df["uf"] == uf_usuario)]
 
         for id_vot, pergunta in perguntas.items():
             voto_linha = votos_vencedor[votos_vencedor["id_votacao"] == id_vot]
