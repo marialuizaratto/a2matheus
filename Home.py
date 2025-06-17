@@ -4,37 +4,7 @@ import wikipedia
 import requests
 from bs4 import BeautifulSoup
 
-st.set_page_config(page_title="Afinidade Legislativa", layout="centered", initial_sidebar_state="expanded")
-
-# Título e explicação
-st.title("📊 Afinidade Legislativa com Deputados Federais")
-
-st.markdown("""
-Este aplicativo compara suas opiniões com votações reais da Câmara dos Deputados.
-
-A partir das suas respostas, identificamos quais deputados **do seu estado** votam de forma mais alinhada com você.
-
-### 🧠 Como funciona o sistema de pontos:
-
-- Se você **concorda muito** e o deputado votou **Sim**, ele ganha **+2 pontos**.
-- Se você **discorda muito** e o deputado votou **Não**, também ganha **+2 pontos**.
-- Se o voto do deputado for o oposto da sua opinião, ele perde pontos.
-- Votos "Abstenção", "Obstrução", etc. contam como **neutros** (0 ponto).
-
-No final, mostramos um ranking de quem mais se alinha com você!
-""")
-
-# Função para carregar os dados
-@st.cache_data
-def carregar_dados():
-    return pd.read_csv("votacoes.csv")  # Certifique-se de ter esse CSV!
-import streamlit as st
-import pandas as pd
-import wikipedia
-import requests
-from bs4 import BeautifulSoup
-
-# Configuração da página e tema
+# Configuração da página — deve ser o primeiro comando streamlit chamado!
 st.set_page_config(page_title="Afinidade Legislativa", layout="centered", initial_sidebar_state="expanded")
 
 # Título e explicação
@@ -91,7 +61,7 @@ st.subheader("🗳️ Suas opiniões sobre os temas abaixo:")
 
 for id_vot, pergunta in perguntas.items():
     st.markdown(f"**{pergunta}**")
-    st.markdown("<br>", unsafe_allow_html=True)  # espaçamento
+    st.markdown("<br>", unsafe_allow_html=True)  # espaçamento extra
     resposta = st.radio("", list(pesos_usuario.keys()), key=id_vot)
     respostas_usuario[id_vot] = resposta
 
@@ -155,7 +125,7 @@ if st.button("🔍 Ver afinidade com deputados"):
         df_graf = pd.DataFrame({"Deputado": nomes, "Afinidade": scores})
         st.bar_chart(df_graf.set_index("Deputado"))
 
-        # Mostrar deputado com menos afinidade
+        # Mostrar deputado com menor afinidade
         dep_menor = ranking[-1][0]
         score_menor = ranking[-1][1]
         st.subheader(f"😕 Deputado com menor afinidade: {dep_menor} — {score_menor} pontos")
