@@ -10,21 +10,6 @@ st.set_page_config(page_title="Afinidade Legislativa", layout="centered", initia
 # Título e explicação
 st.title("📊 Afinidade Legislativa com Deputados Federais")
 
-st.markdown("""
-Este aplicativo compara suas opiniões com votações reais da Câmara dos Deputados.
-
-A partir das suas respostas, identificamos quais deputados **do seu estado** votam de forma mais alinhada com você.
-
-### 🧠 Como funciona o sistema de pontos:
-
-- Se você **concorda muito** e o deputado votou **Sim**, ele ganha **+2 pontos**.
-- Se você **discorda muito** e o deputado votou **Não**, também ganha **+2 pontos**.
-- Se o voto do deputado for o oposto da sua opinião, ele perde pontos.
-- Votos "Abstenção", "Obstrução", etc. contam como **neutros** (0 ponto).
-
-No final, mostramos um ranking de quem mais se alinha com você!
-""")
-
 @st.cache_data
 def carregar_dados():
     return pd.read_csv("votacoes.csv")  # Certifique-se de ter esse CSV!
