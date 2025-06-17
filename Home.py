@@ -20,7 +20,7 @@ def carregar_dados():
 df = carregar_dados()
 
 perguntas = {
-{
+
     "345311-270": "O marco temporal deve ser adotado como critério para a demarcação de terras indígenas.",
     "2438467-47": "O Brasil deve instituir o Dia Nacional para a Ação Climática.",
     "2207613-167":"Sou a favor da privatização de empresas de saneamento básico.",
