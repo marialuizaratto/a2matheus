@@ -4,3 +4,4 @@ pandas
 wikipedia
 requests
 beautifulsoup4
+altair
