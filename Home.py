@@ -31,8 +31,6 @@ perguntas = {
     "2310025-56": "Você apoia a [Lei Aldir Blanc](https://www.gov.br/pt-br/noticias/cultura-artes-historia-e-esportes/2020/08/lei-aldir-blanc-de-apoio-a-cultura-e-regulamentada-pelo-governo-federal) de incentivo à cultura?"
 }
 
-
-
 pesos_usuario = {
     "Discordo muito": -2,
     "Discordo": -1,
@@ -48,31 +46,37 @@ respostas_usuario = {}
 
 st.subheader("🗳️ Suas opiniões sobre os temas abaixo:")
 
+# CSS para estilizar perguntas e respostas, e tirar espaçamento entre eles
+st.markdown(
+    """
+    <style>
+    .pergunta {
+        font-size: 18px;
+        margin-bottom: 0px;
+        font-weight: normal; /* sem negrito */
+    }
+    div[data-testid="stRadio"] > label {
+        font-size: 16px !important;
+        margin: 0px !important;
+        padding: 0 8px 4px 8px !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Barra de progresso para respostas
 progress_resp = st.progress(0)
 
 total_perguntas = len(perguntas)
 for i, (id_vot, pergunta) in enumerate(perguntas.items(), 1):
-    st.markdown(f"<p style='font-size:18px; margin-bottom: 0px; font-weight:bold'>{pergunta}</p>", unsafe_allow_html=True)
+    st.markdown(f'<div class="pergunta">{pergunta}</div>', unsafe_allow_html=True)
 
     resposta = st.radio(
         "",
         list(pesos_usuario.keys()),
         key=id_vot,
         label_visibility="collapsed"
-    )
-
-    # CSS para aumentar fonte das opções do radio e remover margens
-    st.markdown(
-        """
-        <style>
-        div[role="radiogroup"] > label > div[data-testid="stMarkdownContainer"] > p {
-            font-size: 16px;
-            margin: 0px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
     )
 
     respostas_usuario[id_vot] = resposta
@@ -186,8 +190,9 @@ if st.button("🔍 Ver afinidade com deputados"):
                 cor = "red"
 
             st.markdown(
-                f'<span style="color:{cor}">• <b>{pergunta}</b> → {voto_final}</span>',
+                f'<span style="color:{cor}">• {pergunta} → {voto_final}</span>',
                 unsafe_allow_html=True
             )
     else:
         st.info("Nenhum deputado encontrado para esse estado.")
+
