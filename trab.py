@@ -19,7 +19,6 @@ A partir das suas respostas, identificamos quais deputados do seu estado votam d
 
 @@ -22,16 +21,9 @@ def carregar_dados():
 
-# Perguntas associadas a cada id de votação
 perguntas = {
     "345311-270": "Você concorda com o Marco Temporal para demarcação de terras indígenas?",
     "2438467-47": "Você apoia a criação do Dia Nacional para a Ação Climática?",
@@ -30,11 +29,11 @@ perguntas = {
     "2231632-97": "Você concorda que documentos públicos devem usar linguagem acessível?",
     "2345281-63": "Você concorda que mulheres têm direito à cirurgia reparadora das mamas após câncer pelo SUS?",
     "2078693-87": "Você apoia repasses federais mesmo para municípios inadimplentes, se for para combater a violência contra a mulher?",
-    "2310025-56": "Você apoia a Lei Aldir Blanc de incentivo à cultura?"
-    "2453934-65": "Você concorda com o PL das fake news?",
-    "2236291-85": "Você apoia o novo arcabouço fiscal (substituição do teto de gastos)?"
-    # Adicione mais PLs conforme o seu CSV
+    "2310025-56": "Você apoia a Lei Aldir Blanc de incentivo à cultura?",
+ 
+    
 }
+
 
 ufs_disponiveis = sorted(df["uf"].dropna().unique())
 @@ -55,12 +47,24 @@ def carregar_dados():
@@ -46,24 +45,22 @@ def buscar_wikipedia(nome):
     headers = {"User-Agent": "Mozilla/5.0"}
 
     try:
-        resumo = wikipedia.summary(nome, sentences=3)
-        return resumo
+        return wikipedia.summary(nome, sentences=3)
     except Exception:
-        return "Não foi possível encontrar uma descrição na Wikipedia."
-        response = requests.get(url, headers=headers)
-        if response.status_code != 200:
-            return "Não foi possível encontrar uma descrição na Wikipedia."
+        try:
+            response = requests.get(url, headers=headers)
+            if response.status_code != 200:
+                return "Não foi possível encontrar uma descrição na Wikipedia."
 
-        soup = BeautifulSoup(response.text, 'html.parser')
-        paragrafo = soup.select_one("p")
+            soup = BeautifulSoup(response.text, 'html.parser')
+            paragrafo = soup.select_one("p")
 
-        if paragrafo and paragrafo.text.strip():
-            return paragrafo.text.strip()
-        else:
-            return "Página encontrada, mas sem resumo disponível."
-
-    except Exception as e:
-        return f"Erro ao acessar Wikipedia: {e}"
+            if paragrafo and paragrafo.text.strip():
+                return paragrafo.text.strip()
+            else:
+                return "Página encontrada, mas sem resumo disponível."
+        except Exception as e:
+            return f"Erro ao acessar Wikipedia: {e}"
 
 if st.button("Ver afinidade com deputados do seu estado"):
     st.subheader("🏆 Pódio de afinidade legislativa")
