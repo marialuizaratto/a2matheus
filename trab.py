@@ -4,8 +4,7 @@ import wikipedia
 import requests
 from bs4 import BeautifulSoup
 
-# Configuração da página
-st.set_page_config(page_title="Afinidade Legislativa", layout="centered")
+st.set_page_config(page_title="Afinidade Legislativa", layout="centered", initial_sidebar_state="expanded")
 
 # Título e explicação
 st.title("📊 Afinidade Legislativa com Deputados Federais")
