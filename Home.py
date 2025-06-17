@@ -43,13 +43,44 @@ ufs_disponiveis = sorted(df["uf"].dropna().unique())
 uf_usuario = st.selectbox("", ufs_disponiveis)  # Label vazio para não repetir
 
 respostas_usuario = {}
+
 st.subheader("🗳️ Suas opiniões sobre os temas abaixo:")
 
-for id_vot, pergunta in perguntas.items():
-    st.markdown(f"**{pergunta}**")  # pergunta em negrito
-    resposta = st.radio("", list(pesos_usuario.keys()), key=id_vot)  # label vazio para não repetir
+# Barra de progresso para respostas
+progress_resp = st.progress(0)
+
+total_perguntas = len(perguntas)
+for i, (id_vot, pergunta) in enumerate(perguntas.items(), 1):
+    # Pergunta com fonte maior e resposta com fonte maior, e sem espaçamento extra
+    st.markdown(f"<p style='font-size:18px; margin-bottom: 0px; font-weight:bold'>{pergunta}</p>", unsafe_allow_html=True)
+
+    resposta = st.radio(
+        "",
+        list(pesos_usuario.keys()),
+        key=id_vot,
+        label_visibility="collapsed"
+    )
+
+    # Ajuste do CSS para aumentar fonte das opções do radio
+    st.markdown(
+        """
+        <style>
+        div[role="radiogroup"] > label > div[data-testid="stMarkdownContainer"] > p {
+            font-size: 16px;
+            margin: 0px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
     respostas_usuario[id_vot] = resposta
-    st.markdown("<br><br>", unsafe_allow_html=True)  # espaçamento só após as respostas
+
+    # Atualiza barra de progresso
+    progress_resp.progress(i / total_perguntas)
+
+# Remove barra de progresso após responder todas
+progress_resp.empty()
 
 def buscar_wikipedia_info(nome):
     wikipedia.set_lang("pt")
@@ -111,7 +142,7 @@ if st.button("🔍 Ver afinidade com deputados"):
         if menos_afinidade not in deputados_grafico:
             deputados_grafico.append(menos_afinidade)
 
-        # Ordena para gráfico em ordem crescente
+        # Ordena para gráfico em ordem crescente pelo score
         deputados_grafico.sort(key=lambda x: x[1])
 
         nomes = [x[0] for x in deputados_grafico]
@@ -133,7 +164,14 @@ if st.button("🔍 Ver afinidade com deputados"):
         st.subheader(f"🧾 Quem é {nome_vencedor}?")
         resumo, imagem_url = buscar_wikipedia_info(nome_vencedor)
         if imagem_url:
-            st.image(imagem_url, width=200)
+            st.markdown(
+                f"""
+                <div style='text-align:center'>
+                    <img src="{imagem_url}" width="200" />
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
         st.write(resumo)
 
         st.subheader(f"📌 Como {nome_vencedor} votou nas questões:")
@@ -165,4 +203,3 @@ if st.button("🔍 Ver afinidade com deputados"):
             )
     else:
         st.info("Nenhum deputado encontrado para esse estado.")
-
