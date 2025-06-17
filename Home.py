@@ -51,7 +51,6 @@ progress_resp = st.progress(0)
 
 total_perguntas = len(perguntas)
 for i, (id_vot, pergunta) in enumerate(perguntas.items(), 1):
-    # Pergunta com fonte maior e resposta com fonte maior, e sem espaçamento extra
     st.markdown(f"<p style='font-size:18px; margin-bottom: 0px; font-weight:bold'>{pergunta}</p>", unsafe_allow_html=True)
 
     resposta = st.radio(
@@ -61,7 +60,7 @@ for i, (id_vot, pergunta) in enumerate(perguntas.items(), 1):
         label_visibility="collapsed"
     )
 
-    # Ajuste do CSS para aumentar fonte das opções do radio
+    # CSS para aumentar fonte das opções do radio e remover margens
     st.markdown(
         """
         <style>
@@ -75,11 +74,8 @@ for i, (id_vot, pergunta) in enumerate(perguntas.items(), 1):
     )
 
     respostas_usuario[id_vot] = resposta
-
-    # Atualiza barra de progresso
     progress_resp.progress(i / total_perguntas)
 
-# Remove barra de progresso após responder todas
 progress_resp.empty()
 
 def buscar_wikipedia_info(nome):
@@ -135,33 +131,17 @@ if st.button("🔍 Ver afinidade com deputados"):
         for i, (dep, score) in enumerate(ranking[:3], 1):
             st.write(f"{medalhas[i-1]} {i}º lugar: **{dep}** — {score} pontos")
 
-        # Pega top 3 + menor afinidade, evitando duplicados
-        top3 = ranking[:3]
-        menos_afinidade = min(ranking, key=lambda x: x[1])
-        deputados_grafico = top3.copy()
-        if menos_afinidade not in deputados_grafico:
-            deputados_grafico.append(menos_afinidade)
-
-        # Ordena para gráfico em ordem crescente pelo score
-        deputados_grafico.sort(key=lambda x: x[1])
-
-        nomes = [x[0] for x in deputados_grafico]
-        scores = [x[1] for x in deputados_grafico]
-        df_graf = pd.DataFrame({"Deputado": nomes, "Afinidade": scores})
-
-        st.subheader("📊 Comparativo de afinidade (ordem crescente)")
-        st.bar_chart(df_graf.set_index("Deputado"))
-
-        # Mostrar deputado com menor afinidade
-        dep_menor = menos_afinidade[0]
-        score_menor = menos_afinidade[1]
-        st.subheader(f"😕 Deputado com menor afinidade: {dep_menor} — {score_menor} pontos")
-
-        # Mostrar dados do campeão
+        # Mostrar deputado com maior afinidade (campeão)
         dep_vencedor = ranking[0][0]
+        score_vencedor = ranking[0][1]
         nome_vencedor = dep_vencedor.split(" (")[0]
 
-        st.subheader(f"🧾 Quem é {nome_vencedor}?")
+        # Mostrar deputado com menor afinidade logo abaixo em fonte menor e vermelha
+        menos_afinidade = min(ranking, key=lambda x: x[1])
+        dep_menor = menos_afinidade[0]
+        score_menor = menos_afinidade[1]
+
+        st.markdown(f"<h3 style='margin-top: 1rem;'>🧾 Quem é {nome_vencedor}?</h3>", unsafe_allow_html=True)
         resumo, imagem_url = buscar_wikipedia_info(nome_vencedor)
         if imagem_url:
             st.markdown(
@@ -173,6 +153,12 @@ if st.button("🔍 Ver afinidade com deputados"):
                 unsafe_allow_html=True
             )
         st.write(resumo)
+
+        # Deputado com menor afinidade em vermelho e fonte menor, logo após o campeão
+        st.markdown(
+            f"<p style='color:red; font-size:14px; margin-top:0.5rem;'>😕 Deputado com menor afinidade: <b>{dep_menor}</b> — {score_menor} pontos</p>",
+            unsafe_allow_html=True
+        )
 
         st.subheader(f"📌 Como {nome_vencedor} votou nas questões:")
 
