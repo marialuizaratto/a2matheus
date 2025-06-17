@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-from bs4 import BeautifulSoup
 
 st.set_page_config(page_title="Afinidade Legislativa", layout="centered")
 
@@ -62,40 +61,40 @@ pesos_usuario = {
     "Concordo muito": 2
 }
 
-def buscar_wikipedia_info(nome):
-    busca = f"deputado {nome}"
-    url = f"https://pt.wikipedia.org/wiki/{busca.replace(' ', '_')}"
-    headers = {"User-Agent": "Mozilla/5.0"}
-
+@st.cache_data(show_spinner=False)
+def buscar_info_deputado(id_deputado):
+    url = f"https://dadosabertos.camara.leg.br/api/v2/deputados/{id_deputado}"
     try:
-        response = requests.get(url, headers=headers)
-        if response.status_code != 200:
-            return None, None
-
-        soup = BeautifulSoup(response.text, 'html.parser')
-        paragrafo = soup.select_one("p")
-        img = soup.select_one("table.infobox img")
-
-        resumo = paragrafo.text.strip() if paragrafo else "Sem resumo disponível."
-        imagem_url = f"https:{img['src']}" if img else None
-
-        return resumo, imagem_url
-
+        resp = requests.get(url, headers={"Accept": "application/json"})
+        if resp.status_code == 200:
+            dados = resp.json()["dados"]
+            nome = dados["nome"]
+            partido = dados["ultimoStatus"]["siglaPartido"]
+            uf = dados["ultimoStatus"]["siglaUf"]
+            url_foto = dados["ultimoStatus"]["urlFoto"]
+            return {
+                "nome": nome,
+                "partido": partido,
+                "uf": uf,
+                "foto": url_foto
+            }
+        else:
+            return None
     except Exception:
-        return None, None
+        return None
 
 if st.button("Ver afinidade com deputados do seu estado"):
     st.subheader("🏆 Pódio de afinidade legislativa")
 
     pontuacoes = {}
+    deputados_analise = {}
 
     for id_vot, resposta_usuario in respostas_usuario.items():
         peso_usuario = pesos_usuario.get(resposta_usuario, 0)
         votos_pl = df[(df["id_votacao"] == id_vot) & (df["uf"] == uf_usuario)]
 
         for _, linha in votos_pl.iterrows():
-            nome = linha["nome"]
-            partido = linha["partido"]
+            id_dep = linha["id_deputado"]  # certifique-se que essa coluna existe
             voto_dep = linha["voto"]
 
             if voto_dep == "Sim":
@@ -106,54 +105,61 @@ if st.button("Ver afinidade com deputados do seu estado"):
                 peso_dep = 0
 
             compat = peso_usuario * peso_dep
-            chave = f"{nome} ({partido})"
-            pontuacoes[chave] = pontuacoes.get(chave, 0) + compat
 
-    ranking = sorted(pontuacoes.items(), key=lambda x: x[1], reverse=True)
+            # armazenar pontuação somada
+            pontuacoes[id_dep] = pontuacoes.get(id_dep, 0) + compat
 
-    if ranking:
-        for i, (dep, score) in enumerate(ranking[:3], 1):
-            st.write(f"{i}º lugar: {dep} — {score} pontos")
-
-        dep_vencedor = ranking[0][0]
-        nome_vencedor = dep_vencedor.split(" (")[0]
-
-        st.subheader(f"🧾 Quem é {nome_vencedor}?")
-        resumo, imagem_url = buscar_wikipedia_info(nome_vencedor)
-
-        if imagem_url:
-            st.image(imagem_url, width=200)
-        if resumo:
-            st.write(resumo)
-        else:
-            st.write("Não foi possível encontrar uma descrição.")
-
-        st.subheader(f"📌 Como {nome_vencedor} votou nas questões:")
-        votos_vencedor = df[(df["nome"] == nome_vencedor) & (df["uf"] == uf_usuario)]
-
-        for id_vot, pergunta in perguntas.items():
-            voto_linha = votos_vencedor[votos_vencedor["id_votacao"] == id_vot]
-            voto_final = voto_linha["voto"].iloc[0] if not voto_linha.empty else "Sem registro"
-
-            peso_usuario = pesos_usuario[respostas_usuario[id_vot]]
-            if voto_final == "Sim":
-                peso_dep = 1
-            elif voto_final == "Não":
-                peso_dep = -1
-            else:
-                peso_dep = 0
-
-            if peso_usuario == 0 or peso_dep == 0:
-                cor = "gray"
-            elif peso_usuario == peso_dep or peso_usuario * peso_dep > 0:
-                cor = "green"
-            else:
-                cor = "red"
-
-            st.markdown(
-                f'<span style="color:{cor}">• <b>{pergunta}</b> → {voto_final}</span>',
-                unsafe_allow_html=True
-            )
-    else:
+    if not pontuacoes:
         st.info("Nenhum deputado encontrado para esse estado.")
+    else:
+        # Ordena deputados pelo score
+        ranking = sorted(pontuacoes.items(), key=lambda x: x[1], reverse=True)
+
+        # Buscar info dos top 3 deputados via API
+        st.write("### Top 3 deputados mais alinhados:")
+        for i, (id_dep, score) in enumerate(ranking[:3], 1):
+            info = buscar_info_deputado(id_dep)
+            if info:
+                st.write(f"{i}º lugar: {info['nome']} ({info['partido']}-{info['uf']}) — {score} pontos")
+                st.image(info['foto'], width=120)
+            else:
+                st.write(f"{i}º lugar: Deputado ID {id_dep} — {score} pontos (Info não disponível)")
+
+        # Mostrar detalhes do 1º colocado
+        id_vencedor = ranking[0][0]
+        info_vencedor = buscar_info_deputado(id_vencedor)
+        if info_vencedor:
+            st.subheader(f"🧾 Quem é {info_vencedor['nome']}?")
+            st.image(info_vencedor['foto'], width=200)
+            st.write(f"Partido: {info_vencedor['partido']} - {info_vencedor['uf']}")
+
+            st.subheader(f"📌 Como {info_vencedor['nome']} votou nas questões:")
+
+            votos_vencedor = df[(df["id_deputado"] == id_vencedor) & (df["uf"] == uf_usuario)]
+
+            for id_vot, pergunta in perguntas.items():
+                voto_linha = votos_vencedor[votos_vencedor["id_votacao"] == id_vot]
+                voto_final = voto_linha["voto"].iloc[0] if not voto_linha.empty else "Sem registro"
+
+                peso_usuario = pesos_usuario[respostas_usuario[id_vot]]
+                if voto_final == "Sim":
+                    peso_dep = 1
+                elif voto_final == "Não":
+                    peso_dep = -1
+                else:
+                    peso_dep = 0
+
+                if peso_usuario == 0 or peso_dep == 0:
+                    cor = "gray"
+                elif peso_usuario == peso_dep or peso_usuario * peso_dep > 0:
+                    cor = "green"
+                else:
+                    cor = "red"
+
+                st.markdown(
+                    f'<span style="color:{cor}">• <b>{pergunta}</b> → {voto_final}</span>',
+                    unsafe_allow_html=True
+                )
+        else:
+            st.info("Não foi possível recuperar informações do deputado vencedor.")
 
