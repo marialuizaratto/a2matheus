@@ -40,12 +40,13 @@ perguntas = {
     
     "2310025-56": "A [Lei Aldir Blanc](https://www.gov.br/pt-br/noticias/cultura-artes-historia-e-esportes/2020/08/lei-aldir-blanc-de-apoio-a-cultura-e-regulamentada-pelo-governo-federal) de incentivo à cultura deve ser apoiada.",
     
-    "2266116-87": "Presos por homicídio qualificado devem cumprir pena em estabelecimentos federais sob o [Regime Disciplinar Diferenciado](https://www.jusbrasil.com.br/artigos/entenda-como-funciona-o-regime-disciplinar-diferenciado/432801474) (RDD).",
+    "2266116-87": "Pessoas condenadas por homicídio qualificado (crime com agravantes, como motivo torpe, uso de crueldade ou impossibilidade de defesa da vítima) devem cumprir pena em presídios federais sob o [Regime Disciplinar Diferenciado](https://www.jusbrasil.com.br/artigos/entenda-como-funciona-o-regime-disciplinar-diferenciado/432801474) e em unidades de segurança máxima.",
     
     "2171314-10": "É urgente discutir e aprovar um projeto de lei sobre fake news.",
     
     "2220292-229": "O voto impresso deve substituir o voto por urna eletrônica."
 }
+
 
 
 
