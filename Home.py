@@ -20,7 +20,7 @@ def carregar_dados():
 df = carregar_dados()
 
 perguntas = {
-    "345311-270": "O marco temporal deve ser adotado como critério para a demarcação de terras indígenas. [Saiba mais](https://www.camara.leg.br/noticias/966618-o-que-e-marco-temporal-e-quais-os-argumentos-favoraveis-e-contrarios/)",
+    "345311-270": "O [marco temporal](https://www.camara.leg.br/noticias/966618-o-que-e-marco-temporal-e-quais-os-argumentos-favoraveis-e-contrarios/) deve ser adotado como critério para a demarcação de terras indígenas.",
     
     "2438467-47": "O Brasil deve instituir o Dia Nacional para a Ação Climática.",
     
@@ -28,7 +28,7 @@ perguntas = {
     
     "264726-144": "A pena para porte ilegal de arma deve ser aumentada.",
     
-    "604557-205": "A Lei do Mar, que regula a exploração sustentável dos recursos marítimos, deve ser aprovada. [Leia a notícia](https://www.camara.leg.br/noticias/1163592-camara-aprova-projeto-que-cria-a-lei-do-mar)",
+    "604557-205": "A [Lei do Mar](https://www.camara.leg.br/noticias/1163592-camara-aprova-projeto-que-cria-a-lei-do-mar), que regula a exploração sustentável dos recursos marítimos, deve ser aprovada.",
     
     "2417025-55": "Uma pessoa que ganha 2 salários mínimos deve pagar imposto de renda.",
     
@@ -38,9 +38,9 @@ perguntas = {
     
     "2078693-87": "O governo federal deve repassar recursos a municípios inadimplentes para combater a violência contra a mulher.",
     
-    "2310025-56": "A Lei Aldir Blanc de incentivo à cultura deve ser apoiada. [Veja mais](https://www.gov.br/pt-br/noticias/cultura-artes-historia-e-esportes/2020/08/lei-aldir-blanc-de-apoio-a-cultura-e-regulamentada-pelo-governo-federal)",
+    "2310025-56": "A [Lei Aldir Blanc](https://www.gov.br/pt-br/noticias/cultura-artes-historia-e-esportes/2020/08/lei-aldir-blanc-de-apoio-a-cultura-e-regulamentada-pelo-governo-federal) de incentivo à cultura deve ser apoiada.",
     
-    "2266116-87": "Presos por homicídio qualificado devem cumprir pena em estabelecimentos federais sob regime disciplinar diferenciado (RDD). [Entenda o que é o RDD](https://www.jusbrasil.com.br/artigos/entenda-como-funciona-o-regime-disciplinar-diferenciado/432801474)",
+    "2266116-87": "Presos por homicídio qualificado devem cumprir pena em estabelecimentos federais sob o [Regime Disciplinar Diferenciado](https://www.jusbrasil.com.br/artigos/entenda-como-funciona-o-regime-disciplinar-diferenciado/432801474) (RDD).",
     
     "2171314-10": "É urgente discutir e aprovar um projeto de lei sobre fake news.",
     
