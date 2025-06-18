@@ -15,7 +15,7 @@ st.markdown("<h3 style='font-size:24px;'>📍 Escolha seu estado:</h3>", unsafe_
 
 @st.cache_data
 def carregar_dados():
-    return pd.read_csv("votacoes.csv")  # Certifique-se de ter esse CSV!
+    return pd.read_csv("votacoes.csv")
 
 df = carregar_dados()
 
@@ -50,7 +50,6 @@ respostas_usuario = {}
 
 st.subheader("🗳️ Suas opiniões sobre os temas abaixo:")
 
-# Converter links Markdown para HTML
 def md_to_html_link(text):
     pattern = r"\[([^\]]+)\]\(([^)]+)\)"
     return re.sub(pattern, r'<a href="\2" target="_blank" style="color:#1a73e8;">\1</a>', text)
@@ -69,7 +68,7 @@ for i, (id_vot, pergunta) in enumerate(perguntas.items(), 1):
     resposta = st.radio(
         "",
         list(pesos_usuario.keys()),
-        key=f"radio_{id_vot}",
+        key=f"radio_{str(id_vot)}",  # Correção aqui
         label_visibility="collapsed"
     )
 
@@ -140,6 +139,7 @@ if st.button("🔍 Ver afinidade com deputados"):
     progress.empty()
 
     ranking.sort(key=lambda x: x[2], reverse=True)
+
     medalhas = ["🥇", "🥈", "🥉"]
 
     if ranking:
@@ -199,6 +199,7 @@ if st.button("🔍 Ver afinidade com deputados"):
             )
     else:
         st.info("Nenhum deputado encontrado para esse estado.")
+
 
 
 
