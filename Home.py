@@ -21,35 +21,19 @@ df = carregar_dados()
 
 perguntas = {
     "345311-270": "O [marco temporal](https://www.camara.leg.br/noticias/966618-o-que-e-marco-temporal-e-quais-os-argumentos-favoraveis-e-contrarios/) deve ser adotado como critério para a demarcação de terras indígenas.",
-    
     "2438467-47": "O Brasil deve instituir o Dia Nacional para a Ação Climática.",
-    
     "2207613-167": "Sou a favor da privatização de empresas de saneamento básico.",
-    
     "264726-144": "A pena para porte ilegal de arma deve ser aumentada.",
-    
     "604557-205": "A [Lei do Mar](https://www.camara.leg.br/noticias/1163592-camara-aprova-projeto-que-cria-a-lei-do-mar), que regula a exploração sustentável dos recursos marítimos, deve ser aprovada.",
-    
     "2417025-55": "Uma pessoa que ganha 2 salários mínimos deve pagar imposto de renda.",
-    
     "2231632-97": "Documentos públicos devem obrigatoriamente usar linguagem acessível.",
-    
     "2345281-63": "Mulheres têm direito à cirurgia reparadora das mamas pelo SUS após o câncer.",
-    
     "2078693-87": "O governo federal deve repassar recursos a municípios inadimplentes para combater a violência contra a mulher.",
-    
     "2310025-56": "A [Lei Aldir Blanc](https://www.gov.br/pt-br/noticias/cultura-artes-historia-e-esportes/2020/08/lei-aldir-blanc-de-apoio-a-cultura-e-regulamentada-pelo-governo-federal) de incentivo à cultura deve ser apoiada.",
-    
     "2266116-87": "Pessoas condenadas por homicídio qualificado (crime com agravantes, como motivo torpe, uso de crueldade ou impossibilidade de defesa da vítima) devem cumprir pena em presídios federais sob o [Regime Disciplinar Diferenciado](https://www.jusbrasil.com.br/artigos/entenda-como-funciona-o-regime-disciplinar-diferenciado/432801474) e em unidades de segurança máxima.",
-    
     "2171314-10": "É urgente discutir e aprovar um projeto de lei sobre fake news.",
-    
     "2220292-229": "O voto impresso deve substituir o voto por urna eletrônica."
 }
-
-
-
-
 
 pesos_usuario = {
     "Discordo muito": -2,
@@ -60,18 +44,17 @@ pesos_usuario = {
 }
 
 ufs_disponiveis = sorted(df["uf"].dropna().unique())
-uf_usuario = st.selectbox("", ufs_disponiveis)  # Label vazio para não repetir
+uf_usuario = st.selectbox("", ufs_disponiveis)
 
 respostas_usuario = {}
 
 st.subheader("🗳️ Suas opiniões sobre os temas abaixo:")
 
-# Função para converter links Markdown para HTML
+# Converter links Markdown para HTML
 def md_to_html_link(text):
     pattern = r"\[([^\]]+)\]\(([^)]+)\)"
     return re.sub(pattern, r'<a href="\2" target="_blank" style="color:#1a73e8;">\1</a>', text)
 
-# Barra de progresso para respostas
 progress_resp = st.progress(0)
 total_perguntas = len(perguntas)
 
@@ -86,7 +69,7 @@ for i, (id_vot, pergunta) in enumerate(perguntas.items(), 1):
     resposta = st.radio(
         "",
         list(pesos_usuario.keys()),
-        key=id_vot,
+        key=f"radio_{id_vot}",
         label_visibility="collapsed"
     )
 
@@ -157,7 +140,6 @@ if st.button("🔍 Ver afinidade com deputados"):
     progress.empty()
 
     ranking.sort(key=lambda x: x[2], reverse=True)
-
     medalhas = ["🥇", "🥈", "🥉"]
 
     if ranking:
@@ -217,6 +199,7 @@ if st.button("🔍 Ver afinidade com deputados"):
             )
     else:
         st.info("Nenhum deputado encontrado para esse estado.")
+
 
 
 
